@@ -1,14 +1,11 @@
 import streamlit as st
-import pickle
+import joblib
 import numpy as np
 import pandas as pd
 
-# Load trained model and feature names
-with open("salary_model.pkl", "rb") as file:
-    model = pickle.load(file)
-
-with open("model_features.pkl", "rb") as file:
-    feature_names = pickle.load(file)
+# Load trained model and feature names using joblib
+model = joblib.load("salary_model.joblib")
+feature_names = joblib.load("model_features.joblib")
 
 st.set_page_config(page_title="Salary Prediction App", layout="centered")
 st.title("💼 Salary Prediction App")
@@ -36,13 +33,13 @@ input_data["Number_of_Publications"] = publications
 input_data["Certifications"] = certifications
 input_data["International_degree_any"] = 1 if international_degree == "Yes" else 0
 
-# Handle education
-if f"Education_PG" in input_data.columns:
+# Handle education columns if they exist
+if "Education_PG" in input_data.columns:
     input_data["Education_PG"] = 1 if education == "PG" else 0
-if f"Education_Doctorate" in input_data.columns:
+if "Education_Doctorate" in input_data.columns:
     input_data["Education_Doctorate"] = 1 if education == "Doctorate" else 0
 
-# Predict
+# Predict salary
 if st.button("💰 Predict Salary"):
     try:
         predicted_salary = model.predict(input_data)[0]

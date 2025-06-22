@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import pickle
+import joblib
 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
@@ -11,11 +11,13 @@ from sklearn.metrics import r2_score, mean_squared_error
 print("📥 Loading cleaned dataset...")
 df = pd.read_csv("cleaned_expected_ctc.csv")
 
+# Drop unnecessary ID columns
 df.drop(["IDX", "Applicant_ID"], axis=1, inplace=True)
 
 print("🔄 Performing one-hot encoding on categorical features...")
 df_encoded = pd.get_dummies(df, drop_first=True)
 
+# Features and target
 X = df_encoded.drop("Expected_CTC", axis=1)
 y = df_encoded["Expected_CTC"]
 
@@ -52,7 +54,6 @@ for name, model in models:
     mse = mean_squared_error(y_test, y_pred)
     rmse = np.sqrt(mse)
 
-
     print(f"\n{name}")
     print(f"R² Score: {r2:.4f}")
     print(f"RMSE: {rmse:,.2f}")
@@ -61,14 +62,12 @@ for name, model in models:
         best_score = r2
         best_model = model
 
+# Save best model with joblib
 print("\n💾 Saving the best model (based on R²)...")
-with open("salary_model.pkl", "wb") as f:
-    pickle.dump(best_model, f)
+joblib.dump(best_model, "salary_model.joblib")
+print("✅ Best model saved as 'salary_model.joblib'")
 
-print("✅ Best model saved as 'salary_model.pkl'")
-
-# Save feature columns used in training
+# Save feature columns with joblib
 feature_names = X.columns.tolist()
-with open("model_features.pkl", "wb") as f:
-    pickle.dump(feature_names, f)
-print("✅ Feature names saved as 'model_features.pkl'")
+joblib.dump(feature_names, "model_features.joblib")
+print("✅ Feature names saved as 'model_features.joblib'")
